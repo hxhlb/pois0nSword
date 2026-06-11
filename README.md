@@ -1,4 +1,5 @@
 # cve-2025-43529-arbitrary-ref
+By GenericCoding with a major contribution by @zeroxjf fixing krw 
 A demonstration of arbitrary address referencing using cve-2025-43529
 Most of the code comes from cve-2025-43529 POC by jir4vv1t and the darksword web implementation. (https://github.com/ghh-jb/DarkSword/) 
 
