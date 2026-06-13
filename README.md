@@ -1,5 +1,5 @@
 # posi0nSword 
-By GenericCoding with a major contribution by @zeroxjf fixing krw. 
+By GenericCoding with a major contribution by @zeroxjf fixing webkit r/w. 
 
 A demonstration of arbitrary read write using cve-2025-43529 on iOS 26.1 
 
