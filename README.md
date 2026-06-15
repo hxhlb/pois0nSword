@@ -4,10 +4,9 @@ By GenericCoding with a major contribution by @zeroxjf fixing webkit r/w.
 A demonstration of arbitrary read write using cve-2025-43529 on iOS 26.1 
 
 - [x] R/W primatives 
-
 - [x] GC disabling in WIP branch
 - [x] JitAllowList overwrite in WIP branch
-
+- [x] Get slide in WIP branch 
 Most of the code comes from cve-2025-43529 POC by jir4vv1t and the darksword web implementation. (https://github.com/ghh-jb/DarkSword/) 
 
 # Write-up 
