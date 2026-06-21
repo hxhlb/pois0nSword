@@ -5,10 +5,11 @@ A demonstration of arbitrary webcontent read write using cve-2025-43529 on iOS 2
 
 - [x] R/W primatives
 
-# WIP branch features:
+#### WIP branch features:
 - [x] GC disabling
 - [x] JitAllowList overwrite
 - [x] Get slide
+- [x] Get correct vtable for web worker 
 - [x] Initial work on creating the web worker for dlopen
 - [x] Most iPhone 15 plus offsets for 26.1
 - [x] Patch offsets with slide
