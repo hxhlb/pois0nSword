@@ -447,7 +447,7 @@ self.onmessage = async function (e) {
                         this.write64 = write64;
                         const vm = read64(read64(addrof(globalThis) + 0x10n) + 0x38n);
                         const heap = vm + 0xc0n;
-                        const isSafeToCollect = heap + 0x241n;
+                        const isSafeToCollect = heap + 0x259n;
                         function write8(ptr, u16) {
                             let value = read64(ptr);
                             value &= ~0xffn;
