@@ -7,7 +7,9 @@ Credits:
 
 
 GenericCoding - main developer
+
 zeroxjf - fixing webcontent r/w and debugging
+
 varik - fixing iOS offset for GC disabling which fixed a crash
 
 
